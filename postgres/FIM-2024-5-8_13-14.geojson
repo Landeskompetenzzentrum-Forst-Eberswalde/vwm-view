@@ -1,0 +1,868 @@
+{
+    "type": "FeatureCollection",
+    "name": "FIM - Forest Inventory and Monitoring",
+    "crs": {
+        "type": "name",
+        "properties": {
+            "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+        }
+    },
+    "features": [
+        {
+            "type": "Feature",
+            "properties": {
+                "id": "300b48ef-9d96-4919-8c33-493cddd298b7",
+                "los_id": 23,
+                "status": true,
+                "type": null,
+                "version": null,
+                "created": "2024-05-08T09:46:39.698",
+                "modified": "2024-05-08T12:13:14.239",
+                "workflow": 5,
+                "losnr": "",
+                "form": {
+                    "general": {
+                        "spaufsucheaufnahmetruppkuerzel": "PS,SS",
+                        "spaufsuchenichtbegehbarursacheid": 1,
+                        "spaufsucheaufnahmetruppgnss": "geomax",
+                        "spaufsuchenichtwaldursacheid": 0
+                    },
+                    "coordinates": {
+                        "spaufsucheverschobenursacheid": null,
+                        "s_perma": null,
+                        "istgeom_y": 13.70446479268116,
+                        "istgeom_x": 52.95954308628019,
+                        "istgeom_elev": 103.29410144927536,
+                        "istgeom_sat": 13,
+                        "istgeom_hdop": 0.7768115942028986,
+                        "istgeom_vdop": 1.1333333333333333
+                    },
+                    "stichprobenpunkt": {},
+                    "baumplot1": {
+                        "baumplot1": [
+                            {
+                                "icode_ba": 20,
+                                "azimut": 360,
+                                "distanz": 724,
+                                "bhd": 348,
+                                "messhoehebhd": 13,
+                                "schaele": false,
+                                "fege": false
+                            },
+                            {
+                                "icode_ba": 110,
+                                "azimut": 26,
+                                "distanz": 429,
+                                "bhd": 118,
+                                "messhoehebhd": 13,
+                                "schaele": false,
+                                "fege": false
+                            },
+                            {
+                                "icode_ba": 20,
+                                "azimut": 128,
+                                "distanz": 830,
+                                "bhd": 339,
+                                "messhoehebhd": 13,
+                                "schaele": false,
+                                "fege": false
+                            },
+                            {
+                                "icode_ba": 20,
+                                "azimut": 143,
+                                "distanz": 839,
+                                "bhd": 393,
+                                "messhoehebhd": 13,
+                                "schaele": false,
+                                "fege": false
+                            },
+                            {
+                                "icode_ba": 20,
+                                "azimut": 200,
+                                "distanz": 618,
+                                "bhd": 329,
+                                "messhoehebhd": 13,
+                                "schaele": false,
+                                "fege": false
+                            }
+                        ],
+                        "transectLocation": 0,
+                        "azimuttransektploteins": 0
+                    },
+                    "landmarken1": {
+                        "landmarken1": []
+                    },
+                    "baumplot2": {
+                        "baumplot2": [
+                            {
+                                "icode_ba": 100,
+                                "azimut": 382,
+                                "distanz": 169,
+                                "bhd": 196,
+                                "messhoehebhd": 13,
+                                "schaele": false,
+                                "fege": false
+                            },
+                            {
+                                "icode_ba": 20,
+                                "azimut": 135,
+                                "distanz": 488,
+                                "bhd": 458,
+                                "messhoehebhd": 13,
+                                "schaele": false,
+                                "fege": false
+                            },
+                            {
+                                "icode_ba": 20,
+                                "azimut": 215,
+                                "distanz": 637,
+                                "bhd": 489,
+                                "messhoehebhd": 13,
+                                "schaele": false,
+                                "fege": false
+                            },
+                            {
+                                "icode_ba": 20,
+                                "azimut": 253,
+                                "distanz": 328,
+                                "bhd": 453,
+                                "messhoehebhd": 13,
+                                "schaele": false,
+                                "fege": false
+                            },
+                            {
+                                "icode_ba": 20,
+                                "azimut": 348,
+                                "distanz": 267,
+                                "bhd": 401,
+                                "messhoehebhd": 13,
+                                "schaele": false,
+                                "fege": false
+                            }
+                        ]
+                    },
+                    "landmarken2": {
+                        "landmarken2": []
+                    },
+                    "transekt": {
+                        "protectiveMeasure": 0,
+                        "schutzmassnahmeid": 0,
+                        "transektstoerungursache": null
+                    },
+                    "verjuengungstransekt": {
+                        "verjuengungstransekten": [
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 100,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": true,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 5,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": true,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": true,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": true,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": true,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 20,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": true,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 20,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 2,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 252,
+                                "height": 3,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            },
+                            {
+                                "ba_icode": 20,
+                                "height": 1,
+                                "verjuengungstransektbhd": null,
+                                "verjuengungstransektschutzmassnahmen": 0,
+                                "verjuengungstransekttriebverlustdurchinsektenfrass": false,
+                                "verjuengungstransekttriebverlustdurchschalenwildverbiss": false,
+                                "verjuengungstransekttriebverlustdurchfrost": false,
+                                "verjuengungstransekttriebverlustdurchtrockenheit": false,
+                                "verjuengungstransekttriebverlustdurchfege": false
+                            }
+                        ],
+                        "transectLength": null,
+                        "verjuengungstransektlaenge": 10
+                    },
+                    "weiserpflanzen": {
+                        "krautanteil": 80,
+                        "moos": {
+                            "weiserpflanzenmoos": 0
+                        },
+                        "kraut": {
+                            "weiserpflanzenbrennessel": 0,
+                            "weiserpflanzengoldnessel": 0,
+                            "weiserpflanzenheidekraut": 0,
+                            "weiserpflanzenspringkraut": 0,
+                            "weiserpflanzenmaigloeckchen": 0,
+                            "weiserpflanzenweidenroesschen": 0,
+                            "weiserpflanzenwaldmeister": 0,
+                            "weiserpflanzenwaldsauerklee": 0,
+                            "weiserpflanzenwegerich": 0
+                        },
+                        "grass": {
+                            "weiserpflanzendrahtschmiele": 0,
+                            "weiserpflanzenflaterbinse": 0,
+                            "weiserpflanzenhainrispengras": 0,
+                            "weiserpflanzenperlgras": 0,
+                            "weiserpflanzenpfeifengras": 0,
+                            "weiserpflanzensandrohr": 0,
+                            "weiserpflanzenwaldzwenke": 0,
+                            "weiserpflanzenwinkelsegge": 0
+                        },
+                        "farne": {
+                            "weiserpflanzenadlerfarn": 0
+                        },
+                        "doldengewaechse": {
+                            "weiserpflanzengiersch": 0
+                        },
+                        "beerenstraucher": {
+                            "weiserpflanzenheidelbeere": 0,
+                            "weiserpflanzenpreiselbeere": 0
+                        },
+                        "grosstraucher": {
+                            "weiserpflanzenhimbeere": 0,
+                            "weiserpflanzenbrombeere": 0
+                        }
+                    },
+                    "transektinfo": {
+                        "transektfrassmaus": false,
+                        "transektfrasshase": false,
+                        "transektfrassbieber": false
+                    },
+                    "bestandsbeschreibung": {
+                        "bestandbetriebsartid": 1,
+                        "bestandkronenschlussgradid": 3,
+                        "bestandschutzmassnahmenid": 0,
+                        "bestandnschichtigid": 7,
+                        "bestandbiotopid": 0,
+                        "bestandbedeckungsgradunterstand": 5,
+                        "bestandbedeckungsgradgraeser": 90,
+                        "bestandheterogenitaetsgradid": 3
+                    },
+                    "t_bestockung": {
+                        "t_bestockung": [
+                            {
+                                "schicht_id": 3,
+                                "icode_ba": 20,
+                                "nas_id": 3,
+                                "entsart_id": 3,
+                                "vert_id": 8,
+                                "ba_anteil": 100
+                            },
+                            {
+                                "schicht_id": 25,
+                                "icode_ba": 111,
+                                "nas_id": 2,
+                                "entsart_id": null,
+                                "vert_id": 2,
+                                "ba_anteil": 100
+                            },
+                            {
+                                "schicht_id": 4,
+                                "icode_ba": 908,
+                                "nas_id": 10,
+                                "entsart_id": null,
+                                "vert_id": 2,
+                                "ba_anteil": 1
+                            },
+                            {
+                                "schicht_id": 4,
+                                "icode_ba": 230,
+                                "nas_id": 10,
+                                "entsart_id": null,
+                                "vert_id": 2,
+                                "ba_anteil": 2
+                            },
+                            {
+                                "schicht_id": 4,
+                                "icode_ba": 100,
+                                "nas_id": 10,
+                                "entsart_id": null,
+                                "vert_id": 8,
+                                "ba_anteil": 5
+                            },
+                            {
+                                "schicht_id": 4,
+                                "icode_ba": 252,
+                                "nas_id": 10,
+                                "entsart_id": 1,
+                                "vert_id": 8,
+                                "ba_anteil": 87
+                            },
+                            {
+                                "schicht_id": 4,
+                                "icode_ba": 252,
+                                "nas_id": 11,
+                                "entsart_id": 1,
+                                "vert_id": 2,
+                                "ba_anteil": 5
+                            }
+                        ]
+                    },
+                    "t_bodenvegetation": {
+                        "t_bodenvegetation": [
+                            {
+                                "bodenveggr": 1,
+                                "verteilung": 8,
+                                "anteil": 70
+                            },
+                            {
+                                "bodenveggr": 10,
+                                "verteilung": 3,
+                                "anteil": 5
+                            },
+                            {
+                                "bodenveggr": 2,
+                                "verteilung": 8,
+                                "anteil": 80
+                            },
+                            {
+                                "bodenveggr": 4,
+                                "verteilung": null,
+                                "anteil": 80
+                            }
+                        ]
+                    },
+                    "stoerung": {
+                        "thinning": false,
+                        "sanitaryStrokes": false,
+                        "wildfire": false,
+                        "storm": false,
+                        "soilCultivation": false,
+                        "note": null
+                    }
+                },
+                "valid": null
+            },
+            "geometry": {
+                "type": "Point",
+                "coordinates": [
+                    13.704463307647664,
+                    52.959545504988746
+                ]
+            }
+        }
+    ]
+}

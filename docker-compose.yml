@@ -4,7 +4,7 @@
 services:
 
   postgrest:
-    restart: always
+    restart: no
     image: "postgrest/postgrest:v12.0.2"
     ports:
       - "3000:3000"
@@ -23,7 +23,7 @@ services:
 
 
   postgres:
-    restart: always
+    restart: no
     image: "kartoza/postgis"
     ports:
         - "5432:5432"
@@ -41,60 +41,17 @@ services:
       - ./postgrest-config.sql:/docker-entrypoint-initdb.d/11-postgrest-config.sql
 
       # Postgrest Permission Management
-      - ./ci2027-db-structure/globals.sql:/docker-entrypoint-initdb.d/10-globals.sql
-
-      ### Old Setup (deprecated)
-      - ./ci2027-db-structure/structure.sql:/docker-entrypoint-initdb.d/20-structure.sql
-      - ./ci2027-db-data/data.sql:/docker-entrypoint-initdb.d/40-data.sql
-      
-      ### New Setup (to be implemented) 
-      - ./ci2027-db-structure/ci2027/structure.sql:/docker-entrypoint-initdb.d/930-structure.sql
-      - ./ci2027-db-structure/ci2027/lookup_tables.sql:/docker-entrypoint-initdb.d/931-lookup_tables.sql
-
-      - ./ci2027-db-structure/ci2027/cluster.sql:/docker-entrypoint-initdb.d/932-cluster.sql
-
-      - ./ci2027-db-structure/ci2027/lookup_tables/lookup_growth_area.sql:/docker-entrypoint-initdb.d/931-lookup_growth_area.sql
-      - ./ci2027-db-structure/ci2027/lookup_tables/lookup_growth_district.sql:/docker-entrypoint-initdb.d/931-lookup_growth_district.sql
-      - ./ci2027-db-structure/ci2027/plot.sql:/docker-entrypoint-initdb.d/936-plot.sql
-      
-      ##### Example Data (to be replaced with actual data later on)
-      #- ./ci2027-db-structure/ci2027/data.sql:/docker-entrypoint-initdb.d/94-data.sql
-
-      ### Test Setup to be used by automated tests
-      - ./default/cluster.sql:/docker-entrypoint-initdb.d/99-cluster.sql
-      - ./default/user.sql:/docker-entrypoint-initdb.d/99-default-user.sql
-      - ./default/views.sql:/docker-entrypoint-initdb.d/99-default-views.sql
+      - ./postgres/impex.sql:/docker-entrypoint-initdb.d/10-impex.sql
+      #- ./postgres/view.sql:/docker-entrypoint-initdb.d/11-view.sql
+      - ./postgres/import-fn.sql:/docker-entrypoint-initdb.d/12-view-get.sql
+      - ./postgres/export-fn.sql:/docker-entrypoint-initdb.d/13-export-fn.sql
       
       # - ./pgdata:/var/lib/postgresql/data
 
-      # TMP
-      - ./ci2027-db-structure/NFI2022/code_bwineu.sql:/docker-entrypoint-initdb.d/999-coder_bwineu.sql
-
   # https://hub.docker.com/r/prodrigestivill/postgres-backup-local
-  pgbackups:
-    image: prodrigestivill/postgres-backup-local
-    restart: always
-    user: postgres:postgres 
-    volumes:
-        - /var/opt/pgbackups:/backups
-    links:
-        - postgres # :${PGADMIN_HOST_NAME}
-    depends_on:
-        - postgres
-    environment:
-        - POSTGRES_HOST=${PGADMIN_HOST_NAME}
-        - POSTGRES_DB=postgres
-        - POSTGRES_USER=${POSTGRES_USER}
-        - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-        # - POSTGRES_PASSWORD_FILE=/run/secrets/db_password <-- alternative for POSTGRES_PASSWORD (to use with docker secrets)
-        # - POSTGRES_EXTRA_OPTS=-Z1 --schema=public --blobs
-        - SCHEDULE=@daily
-        - BACKUP_KEEP_MONTHS=6
-        - HEALTHCHECK_PORT=8080
 
   pgadmin:
-    restart: always
-    container_name: pgadmin4_container
+    restart: no
     image: dpage/pgadmin4
     environment:
         PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
@@ -111,14 +68,3 @@ services:
     volumes:
       - ./pgadmindata:/var/lib/pgadmin
 
-  swagger:
-    restart: always
-    image: swaggerapi/swagger-ui
-    ports:
-        - "4080:8080"
-    expose:
-        - "4080"
-    environment:
-        API_URL: ${PGRST_OPENAPI_SERVER_PROXY_URI}
-    depends_on:
-      - postgrest
