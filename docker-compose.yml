@@ -12,7 +12,7 @@ services:
       - postgres:postgres
     environment:
       PGRST_DB_URI: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/postgis"
-      PGRST_DB_SCHEMA: api
+      PGRST_DB_SCHEMA: vwm_impex
       PGRST_DB_ANON_ROLE: web_anon
       PGRST_OPENAPI_SERVER_PROXY_URI: ${PGRST_OPENAPI_SERVER_PROXY_URI}
       PGRST_DB_PRE_CONFIG: "postgrest.pre_config"
@@ -37,14 +37,15 @@ services:
       # pgjwt & pgcrypto Extension
       - ./pgjwt/pgjwt.control:/usr/share/postgresql/13/extension/pgjwt.control
       - ./pgjwt/pgjwt--0.2.0-tfm.sql:/usr/share/postgresql/13/extension/pgjwt--0.2.0.sql
-      - ./pgcrypto.sql:/docker-entrypoint-initdb.d/30-pgcrypto.sql
+      - ./pgcrypto.sql:/docker-entrypoint-initdb.d/11-pgcrypto.sql
       - ./postgrest-config.sql:/docker-entrypoint-initdb.d/11-postgrest-config.sql
 
       # Postgrest Permission Management
-      - ./postgres/impex.sql:/docker-entrypoint-initdb.d/10-impex.sql
+      - ./postgres/grants.sql:/docker-entrypoint-initdb.d/12-grants.sql
+      - ./postgres/impex.sql:/docker-entrypoint-initdb.d/13-impex.sql
       #- ./postgres/view.sql:/docker-entrypoint-initdb.d/11-view.sql
-      - ./postgres/import-fn.sql:/docker-entrypoint-initdb.d/12-view-get.sql
-      - ./postgres/export-fn.sql:/docker-entrypoint-initdb.d/13-export-fn.sql
+      - ./postgres/import-fn.sql:/docker-entrypoint-initdb.d/14-import-fn.sql
+      - ./postgres/export-fn.sql:/docker-entrypoint-initdb.d/14-export-fn.sql
       
       # - ./pgdata:/var/lib/postgresql/data
 

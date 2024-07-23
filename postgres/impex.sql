@@ -5,7 +5,7 @@
 -- Dumped from database version 14.12
 -- Dumped by pg_dump version 14.12
 
--- Started on 2024-07-16 15:57:01 UTC
+-- Started on 2024-07-22 17:21:58 UTC
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -24,228 +24,415 @@ SET row_security = off;
 --
 
 CREATE SCHEMA vwm_impex;
-
+ALTER DEFAULT PRIVILEGES IN SCHEMA vwm_impex GRANT SELECT ON TABLES TO web_anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA vwm_impex GRANT USAGE, SELECT ON SEQUENCES TO web_anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA vwm_impex GRANT USAGE ON TYPES TO web_anon;
+ALTER DEFAULT PRIVILEGES IN SCHEMA vwm_impex GRANT EXECUTE ON FUNCTIONS TO web_anon;
 
 ALTER SCHEMA vwm_impex OWNER TO waldinv_admin;
 
 --
--- TOC entry 2657 (class 1255 OID 44093)
--- Name: export_geojson(); Type: FUNCTION; Schema: vwm_impex; Owner: vwm_ats
+-- TOC entry 2658 (class 1255 OID 44126)
+-- Name: import_geojson(json); Type: FUNCTION; Schema: vwm_impex; Owner: vwm_ats
 --
 
-CREATE FUNCTION vwm_impex.export_geojson() RETURNS json
+CREATE FUNCTION vwm_impex.import_geojson(geojson_data json) RETURNS json
     LANGUAGE plpgsql
-    AS $$
-DECLARE
+    AS $$DECLARE
+    added_ids json;
+    feature json;
+    geom geometry;
+    form json;
+    baumplot json;
+    t_bestockung json;
+    verjuengungstransekt json;
+    bodenvegetation json;
+    landmarke json;
+    stoerung json;
+    new_los_id INTEGER;
+    new_bestbes_id INTEGER;
+    new_punktinfo_id INTEGER;
+    new_transektinfo_id INTEGER;
+    stoerungen_map json;
+    i int = 0;
+    fim_stoerung text;
 BEGIN
+    -- Loop through each feature in the GeoJSON
+    FOR feature IN SELECT * FROM json_array_elements(geojson_data->'features')
+    LOOP
+        perform FROM vwm_impex.g_los WHERE fim_id = feature->'properties'->>'id' or id_g_los = feature->'properties'->>'los_id';
+        IF FOUND THEN
+            DELETE FROM vwm_impex.g_los WHERE fim_id = feature->'properties'->>'id' or id_g_los = feature->'properties'->>'los_id';
+        END IF;
 
-    RETURN json_build_object(
-        'type', 'FeatureCollection',
-        'name', 'FIM - Forest Inventory and Monitoring',
-        'crs', json_build_object(
-            'type', 'name',
-            'properties', json_build_object(
-                'name', 'urn:ogc:def:crs:OGC:1.3:CRS84'
-            )
-        ),
-        'features', (
-            SELECT json_agg(
-                json_build_object(
-                    'type', 'Feature',  
-            'geometry', ST_AsGeoJSON(g.ist_geom, 15)::json,
-            'properties', json_build_object(
-                'id', g.fim_id,
-                'los_id', g.id_g_los,
-                'created', g.created,
-                'modified', g.modified,
-                'status', g.fim_status,
-                'workflow', g.workflow,
-                'type', g.fim_type,
-                'version', g.fim_version,
-                'form', 
-                    json_build_object(
-                        'general', json_build_object(
-                                'spaufsucheaufnahmetruppkuerzel', g.spaufsucheaufnahmetruppkuerzel,
-                                'spaufsuchenichtbegehbarursacheid', g.spaufsuchenichtbegehbarursacheid,
-                                'spaufsucheaufnahmetruppgnss', g.spaufsucheaufnahmetruppgnss,
-                                'spaufsuchenichtwaldursacheid', g.spaufsuchenichtwaldursacheid,
-                                'spaufsucheverschobenursacheid', g.spaufsucheverschobenursacheid
-                        ),
-                        'coordinates', json_build_object(
-                            'spaufsucheverschobenursacheid', g.spaufsucheverschobenursacheid,
-                            's_perma', g.s_perma,
-                            'istgeom_x', ST_X(g.ist_geom),
-                            'istgeom_y', ST_Y(g.ist_geom),
-                            'istgeom_elev', g.istgeom_elev,
-                            'istgeom_sat', g.istgeom_sat,
-                            'istgeom_hdop', g.istgeom_hdop,
-                            'istgeom_vdop', g.istgeom_vdop
-                        ),
-                        'stichprobenpunkt', json_build_object(),
-                        'baumplot1', json_build_object(
-                            'baumplot1',(
-                                SELECT json_agg(
-                                    json_build_object(
-                                        'icode_ba', bp.baid,
-                                        'azimut', bp.azi,
-                                        'distanz', bp.dist,
-                                        'bhd', bp.bhd,
-                                        'messhoehebhd', bp.h_bhd,
-                                        'schaele', bp.schal,
-                                        'fege', bp.schal
-                                    )
-                                )
-                                FROM vwm_impex.imp_t_baumplot bp
-                                WHERE bp.los_id = g.id_g_los AND bplotnr = 1
-                            ),
-                            'transectLocation', 0,
-                            'azimuttransektploteins', (
-                                SELECT ti.azi
-                                FROM vwm_impex.imp_t_transektinfo ti
-                                WHERE ti.los_id = g.id_g_los
-                            )
-                        ),
-                        'landmarken1', json_build_object(
-                            'landmarken1',(
-                                SELECT json_agg(
-                                    json_build_object(
-                                        'landmarken', lm1.typ,
-                                        'azimut', lm1.azi,
-                                        'distanz', lm1.dist
-                                    )
-                                )
-                                FROM vwm_impex.imp_t_landmarke lm1
-                                WHERE lm1.los_id = g.id_g_los AND lplotnr = 1
-                            )
-                        ),
-                        'baumplot2', json_build_object(
-                            'baumplot2',(
-                                SELECT json_agg(
-                                    json_build_object(
-                                        'icode_ba', bp2.baid,
-                                        'azimut', bp2.azi,
-                                        'distanz', bp2.dist,
-                                        'bhd', bp2.bhd,
-                                        'messhoehebhd', bp2.h_bhd,
-                                        'schaele', bp2.schal,
-                                        'fege', bp2.schal
-                                    )
-                                )
-                                FROM vwm_impex.imp_t_baumplot bp2
-                                WHERE bp2.los_id = g.id_g_los AND bplotnr = 2
-                               
-                            )
-                        ),
-                        'landmarken1', json_build_object(
-                            'landmarken1',(
-                                SELECT json_agg(
-                                    json_build_object(
-                                        'landmarken', lm2.typ,
-                                        'azimut', lm2.azi,
-                                        'distanz', lm2.dist
-                                    )
-                                )
-                                FROM vwm_impex.imp_t_landmarke lm2
-                                WHERE lm2.los_id = g.id_g_los AND lplotnr = 2
-                            )
-                        ),
-                        'verjuengungstransekt', json_build_object(
-                            'verjuengungstransekten',(
-                                SELECT json_agg(
-                                    json_build_object(
-                                        'ba_icode', vt.ba_icode,
-                                        'height', vt.hst,
-                                        'verjuengungstransektschutzmassnahmen', vt.sma_id,
-                                        'verjuengungstransektbhd', vt.bhd,
-                                        'verjuengungstransekttriebverlustdurchschalenwildverbiss', vt.verb,
-                                        'verjuengungstransekttriebverlustdurchtrockenheit', vt.trck,
-                                        'verjuengungstransekttriebverlustdurchfrost', vt.frost,
-                                        'verjuengungstransekttriebverlustdurchinsektenfrass', vt.insekt,
-                                        'verjuengungstransekttriebverlustdurchfege', vt.schael_fege
-                                    )
-                                )
-                                FROM vwm_impex.imp_t_transekt vt
-                                WHERE vt.los_id = g.id_g_los
-                            ),
-                            'transectLength', 0,
-                            'verjuengungstransektlaenge', (
-                                SELECT ti.laenge
-                                FROM vwm_impex.imp_t_transektinfo ti
-                                WHERE ti.los_id = g.id_g_los
-                            )
-                        ),
-                        'transektinfo', (
-                            SELECT json_agg(
-                                json_build_object(
-                                    'transektfrasshase', ti.hase,
-                                    'transektfrassmaus', ti.maus,
-                                    'transektfrassbieber', ti.biber
-                                )
-                            )
-                            FROM vwm_impex.imp_t_transektinfo ti
-                            WHERE ti.los_id = g.id_g_los
-                            
-                        ),
-                        'bestandsbeschreibung', (
-                            SELECT json_agg(
-                                json_build_object(
-                                    'bestandheterogenitaetsgradid', bestbes.heterogenigrad,
-                                    'bestandnschichtigid', bestbes.nschicht_id,
-                                    'bestandbetriebsartid', bestbes.bea_id,
-                                    'bestandkronenschlussgradid', bestbes.ksg_id,
-                                    'bestandschutzmassnahmenid', bestbes.sma_id,
-                                    'bestandbedeckungsgradunterstand', bestbes.bed_us,
-                                    'bestandbedeckungsgradgraeser', bestbes.bed_bodenveg
-                                )
-                            )
-                            FROM vwm_impex.imp_t_bestbes bestbes
-                            WHERE bestbes.los_id = g.id_g_los
-                            
-                        ),
-                        't_bestockung', json_build_object(
-                            't_bestockung',(
-                                SELECT json_agg(
-                                    json_build_object(
-                                        'schicht_id', bess.schicht_id,
-                                        'icode_ba', bess.ba_icode,
-                                        'nas_id', bess.nas_id,
-                                        'ba_anteil', bess.ba_anteil,
-                                        'entsart_id', bess.entsart_id,
-                                        'vert_id', bess.vert_id
-                                    )
-                                )
-                                FROM vwm_impex.imp_t_bestbess bess
-                                WHERE bess.los_id = g.id_g_los
-                               
-                            )
-                        ),
-                        't_bodenvegetation', json_build_object(
-                            't_bodenvegetation',(
-                                SELECT json_agg(
-                                    json_build_object(
-                                        'verteilung', tipf.transekti_id,
-                                        'bodenveggr', tipf.indikpfl_id,
-                                        'anteil', tipf.anteilsprozent
-                                    )
-                                )
-                                FROM vwm_impex.imp_t_transektipf tipf
-                                WHERE tipf.los_id = g.id_g_los
-                               
-                            )
-                        )
-                    )
-                )
-            
-                )
-            )
-            FROM vwm_impex.g_los g
+        -- Convert GeoJSON geometry to PostGIS geometry
+        geom := ST_SetSRID(ST_GeomFromGeoJSON(feature->>'geometry'), 4326);
+
+        -- Example: Inserting data into a table. Adjust the table name and columns as necessary.
+        INSERT INTO vwm_impex.g_los (
+            fim_id,
+            los_id,
+            fim_status,
+            fim_type,
+            created,
+            modified,
+            imported,
+            workflow,
+            losnr,
+            spaufsucheaufnahmetruppkuerzel,
+            spaufsucheaufnahmetruppgnss,
+            spaufsuchenichtbegehbarursacheid,
+            spaufsuchenichtwaldursacheid,
+            spaufsucheverschobenursacheid,
+            s_perma,
+            istgeom_elev,
+            istgeom_sat,
+            istgeom_hdop,
+            istgeom_vdop,
+            ist_geom
         )
-    );
-END;
-$$;
+        VALUES (
+            feature->'properties'->>'id',
+            feature->'properties'->>'los_id',
+            CASE
+                WHEN feature->'properties'->>'status' = 'true' THEN TRUE
+                WHEN feature->'properties'->>'status' = 'false' THEN FALSE
+                ELSE NULL -- or default to TRUE/FALSE depending on your requirements
+            END,
+            feature->'properties'->>'type',
+            TO_TIMESTAMP(feature->'properties'->>'created', 'YYYY-MM-DD"T"HH24:MI:SS.US'),
+            TO_TIMESTAMP(feature->'properties'->>'modified', 'YYYY-MM-DD"T"HH24:MI:SS.US'),
+            NOW()::TIMESTAMP,
+            (feature->'properties'->>'workflow')::INTEGER,
+            feature->'properties'->>'losnr',
+            feature->'properties'->'form'->'general'->>'spaufsucheaufnahmetruppkuerzel',
+            feature->'properties'->'form'->'general'->>'spaufsucheaufnahmetruppgnss',
+            (feature->'properties'->'form'->'general'->>'spaufsuchenichtbegehbarursacheid')::INTEGER,
+            (feature->'properties'->'form'->'general'->>'spaufsuchenichtwaldursacheid')::INTEGER,
+            (feature->'properties'->'form'->'coordinates'->>'spaufsucheverschobenursacheid')::INTEGER,
+            (feature->'properties'->'form'->'coordinates'->>'s_perma')::INTEGER,
+            (feature->'properties'->'form'->'coordinates'->>'istgeom_elev')::float,
+            (feature->'properties'->'form'->'coordinates'->>'istgeom_sat')::INTEGER,
+            (feature->'properties'->'form'->'coordinates'->>'istgeom_hdop')::float,
+            (feature->'properties'->'form'->'coordinates'->>'istgeom_vdop')::float,
+            geom
+
+        )
+        ON CONFLICT (fim_id) DO NOTHING
+        RETURNING id_g_los INTO new_los_id;
+
+        -- Save the ID of the inserted row
+        added_ids := json_build_object('id', new_los_id);
+
+        form = feature->'properties'->'form';
+
+        -- BAUMPLOT1
+        i:= 0;
+        FOR baumplot IN SELECT * FROM json_array_elements(form->'baumplot1'->'baumplot1')
+        LOOP
+            i:= i+ 1;
+            INSERT INTO vwm_impex.imp_t_baumplot (
+                los_id,
+                bplotnr,
+                onr,
+                baid,
+                azi,
+                dist,
+                bhd,
+                h_bhd,
+                schal,
+                fege
+            )
+            VALUES (
+                new_los_id,
+                1,
+                i,
+                (baumplot->>'icode_ba')::INT, 
+                (baumplot->>'azimut')::INT,
+                (baumplot->>'distanz')::INT,
+                (baumplot->>'bhd')::INT,
+                (baumplot->>'messhoehebhd')::INT,
+                (baumplot->>'schaele')::BOOLEAN,
+                (baumplot->>'fege')::BOOLEAN
+            );
+        END LOOP;
+        -- BAUMPLOT2
+        i:= 0;
+        FOR baumplot IN SELECT * FROM json_array_elements(form->'baumplot2'->'baumplot2')
+        LOOP
+            i:= i+ 1;
+            INSERT INTO vwm_impex.imp_t_baumplot (
+                los_id,
+                bplotnr,
+                onr,
+                baid,
+                azi,
+                dist,
+                bhd,
+                h_bhd,
+                schal,
+                fege
+            )
+            VALUES (
+                new_los_id,
+                2,
+                i,
+                (baumplot->>'icode_ba')::INT, 
+                (baumplot->>'azimut')::INT,
+                (baumplot->>'distanz')::INT,
+                (baumplot->>'bhd')::INT,
+                (baumplot->>'messhoehebhd')::INT,
+                (baumplot->>'schaele')::BOOLEAN,
+                (baumplot->>'fege')::BOOLEAN
+            );
+        END LOOP;
+
+        -- Landmarke
+        i:= 0;
+        FOR landmarke IN SELECT * FROM json_array_elements(form->'landmarken1'->'landmarken1')
+        LOOP
+            i:= i+ 1;
+            INSERT INTO vwm_impex.imp_t_baumplot (
+                los_id,
+                lplotnr,
+                onr,
+                typ,
+                azi,
+                dist
+            )
+            VALUES (
+                new_los_id,
+                1,
+                i,
+                (landmarke->>'landmarken')::text,
+                (landmarke->>'azimut')::INT,
+                (landmarke->>'distanz')::INT
+            );
+        END LOOP;
+
+        -- Transektinformationen (imp_t_transektinfo)
+        INSERT INTO vwm_impex.imp_t_transektinfo (
+            los_id,
+            laenge,
+            tempstoerung,
+            hase,
+            maus,
+            biber,
+            sma_id,
+            krautanteil,
+            azi,
+            transektstoerungursache
+        )
+        VALUES (
+            new_los_id,
+            (form->'verjuengungstransekt'->>'verjuengungstransektlaenge')::INT,
+            -- set boolean if transektstoerungursache has value
+            CASE
+                WHEN (form->'transekt'->>'transektstoerungursache')::text != 'null' AND (form->'transekt'->>'transektstoerungursache')::text != '' THEN TRUE
+                ELSE FALSE
+            END,
+            (form->'transektinfo'->>'transektfrasshase')::BOOLEAN,
+            (form->'transektinfo'->>'transektfrassmaus')::BOOLEAN,
+            (form->'transektinfo'->>'transektfrassbieber')::BOOLEAN,
+            (form->'transekt'->>'schutzmassnahmeid')::INT,
+            (form->'weiserpflanzen'->>'krautanteil')::INT,
+            (form->'baumplot1'->>'azimuttransektploteins')::INT,
+            form->'transekt'->>'transektstoerungursache'
+        )
+        RETURNING id_transektinfo INTO new_transektinfo_id;
+
+        
+
+        -- Bestandesbeschreibung (imp_t_bestbes)
+        INSERT INTO vwm_impex.imp_t_bestbes (
+            los_id,
+            heterogenigrad,
+            nschicht_id,
+            bea_id,
+            ksg_id,
+            sma_id,
+            bed_us,
+            bed_bodenveg
+        )
+        VALUES (
+            new_los_id,
+            (form->'bestandsbeschreibung'->>'bestandheterogenitaetsgradid')::INT,
+            (form->'bestandsbeschreibung'->>'bestandnschichtigid')::INT,
+            (form->'bestandsbeschreibung'->>'bestandbetriebsartid')::smallint,
+            (form->'bestandsbeschreibung'->>'bestandkronenschlussgradid')::smallint,
+            (form->'bestandsbeschreibung'->>'bestandschutzmassnahmenid')::smallint,
+            (form->'bestandsbeschreibung'->>'bestandbedeckungsgradunterstand')::smallint,
+            (form->'bestandsbeschreibung'->>'bestandbedeckungsgradgraeser')::smallint
+        )
+        RETURNING id_bestbes INTO new_bestbes_id;
 
 
-ALTER FUNCTION vwm_impex.export_geojson() OWNER TO vwm_ats;
+        -- Punktinformationen (imp_b_strg)
+        stoerungen_map := '[
+            {
+                "fim": "thinning",
+                "value": 1
+            },
+            {
+                "fim": "sanitaryStrokes",
+                "value": 2
+            },
+            {
+                "fim": "wildfire",
+                "value": 3
+            },
+            {
+                "fim": "storm",
+                "value": 4
+            },
+            {
+                "fim": "soilCultivation",
+                "value": 5
+            }
+        ]'::json;
+         i:= 1;
+        FOR stoerung IN SELECT * FROM json_array_elements(stoerungen_map)
+        LOOP
+            fim_stoerung := stoerung->>'fim';
+            IF (form->'stoerung'->>fim_stoerung)::BOOLEAN = true THEN
+                
+                INSERT INTO vwm_impex.imp_b_strg (
+                    los_id,
+                    bestbesid,
+                    s_strgid
+                )
+                VALUES (
+                    new_los_id,
+                    new_bestbes_id,
+                    (stoerung->>'value')::INT
+                );
+                
+            END IF;
+            i:= i+ 1;
+        END LOOP;
+        
+        IF (form->'stoerung'->>'note')::text != 'null' THEN
+            INSERT INTO vwm_impex.imp_b_strgsonstig (
+                los_id,
+                stoerung
+            )
+            VALUES (
+                new_los_id,
+                form->'stoerung'->>'note'
+            );
+        END IF;
+
+
+
+
+        -- Bestockung (imp_t_bestbess)
+        i:= 0;
+        FOR t_bestockung IN SELECT * FROM json_array_elements(form->'t_bestockung'->'t_bestockung')
+        LOOP
+            i:= i+ 1;
+            INSERT INTO vwm_impex.imp_t_bestbess (
+                los_id,
+                schicht_id,
+                ba_icode,
+                bestbesid,
+                nas_id,
+                ba_anteil,
+                entsart_id,
+                vert_id
+            )
+            VALUES (
+                new_los_id,
+                (t_bestockung->>'schicht_id')::INT, 
+                (t_bestockung->>'icode_ba')::INT,
+                new_bestbes_id,
+                (t_bestockung->>'nas_id')::INT,
+                (t_bestockung->>'ba_anteil')::INT,
+                (t_bestockung->>'entsart_id')::INT,
+                (t_bestockung->>'vert_id')::INT
+            );
+        END LOOP;
+
+        -- Verjuengungstransekt (imp_t_transekt)
+        i:= 0;
+        FOR verjuengungstransekt IN SELECT * FROM json_array_elements(form->'verjuengungstransekt'->'verjuengungstransekten')
+        LOOP
+            i:= i+ 1;
+            INSERT INTO vwm_impex.imp_t_transekt (
+                los_id,
+                ba_icode,
+                hst,
+                sma_id,
+                bhd,
+                verb,
+                trck,
+                frost,
+                insekt,
+                schael_fege
+            )
+            VALUES (
+                new_los_id,
+                (verjuengungstransekt->>'ba_icode')::INT,
+                (verjuengungstransekt->>'height')::INT,
+                (verjuengungstransekt->>'verjuengungstransektschutzmassnahmen')::INT,
+                (verjuengungstransekt->>'verjuengungstransektbhd')::INT,
+                (verjuengungstransekt->>'verjuengungstransekttriebverlustdurchschalenwildverbiss')::BOOLEAN,
+                (verjuengungstransekt->>'verjuengungstransekttriebverlustdurchtrockenheit')::BOOLEAN,
+                (verjuengungstransekt->>'verjuengungstransekttriebverlustdurchfrost')::BOOLEAN,
+                (verjuengungstransekt->>'verjuengungstransekttriebverlustdurchinsektenfrass')::BOOLEAN,
+                (verjuengungstransekt->>'verjuengungstransekttriebverlustdurchfege')::BOOLEAN
+            );
+        END LOOP;
+
+        -- Bodenvegetation (imp_t_transektipf)
+        i:= 0;
+        FOR bodenvegetation IN SELECT * FROM json_array_elements(form->'t_bodenvegetation'->'t_bodenvegetation')
+        LOOP
+            i:= i+ 1;
+            INSERT INTO vwm_impex.imp_t_transektipf (
+                los_id,
+                transekti_id, -- ?
+                indikpfl_id,
+                anteilsprozent
+            )
+            VALUES (
+                new_los_id,
+                (bodenvegetation->>'verteilung')::INT, -- ?
+                (bodenvegetation->>'bodenveggr')::INT,
+                (bodenvegetation->>'anteil')::INT
+            );
+        END LOOP;
+
+        -- Bodenvegetation (imp_t_transektipf)
+        i:= 0;
+        FOR bodenvegetation IN SELECT * FROM json_array_elements(form->'t_bodenvegetation'->'t_bodenvegetation')
+        LOOP
+            i:= i+ 1;
+            INSERT INTO vwm_impex.imp_t_besbodenveggr (
+                los_id,
+                bodenveggr_id,
+                verteilung_id,
+                prozanteil,
+                bestbesid
+            )
+            VALUES (
+                new_los_id,
+                (bodenvegetation->>'bodenveggr')::INT, -- bodenvegetationsgruppe
+                (bodenvegetation->>'verteilung')::INT,
+                (bodenvegetation->>'anteil')::INT,
+                new_bestbes_id
+            );
+        END LOOP;
+
+        
+        -- Repeat the above INSERT statement for other tables as necessary, mapping GeoJSON properties to table columns.
+    END LOOP;
+
+    -- Return the IDs of the inserted rows
+    RETURN added_ids;
+END;$$;
+
+
+ALTER FUNCTION vwm_impex.import_geojson(geojson_data json) OWNER TO vwm_ats;
 
 SET default_tablespace = '';
 
@@ -267,7 +454,7 @@ CREATE TABLE vwm_impex.g_los (
     imported timestamp without time zone,
     workflow integer,
     wf_wechsel_datum date,
-    los_id character varying,
+    los_id integer,
     losnr character varying,
     unterlosnr character varying,
     jahr integer,
@@ -283,11 +470,51 @@ CREATE TABLE vwm_impex.g_los (
     istgeom_vdop double precision,
     h3index_text character varying,
     h3i_hid character varying,
-    ist_geom public.geometry(Point,4326)
+    aktuell_geom public.geometry(Point,4326),
+    biotopid smallint,
+    istgeom_y double precision,
+    istgeom_x double precision,
+    role_access regrole[]
 );
 
 
 ALTER TABLE vwm_impex.g_los OWNER TO waldinv_admin;
+
+--
+-- TOC entry 7577 (class 0 OID 0)
+-- Dependencies: 1019
+-- Name: COLUMN g_los.aktuell_geom; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.g_los.aktuell_geom IS 'wenn ist_geom vorhanden wird die genommen, sonst soll_geom';
+
+
+--
+-- TOC entry 7578 (class 0 OID 0)
+-- Dependencies: 1019
+-- Name: COLUMN g_los.biotopid; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.g_los.biotopid IS 'BiotoptypID, verschlüsselt in s_biotopbb';
+
+
+--
+-- TOC entry 7579 (class 0 OID 0)
+-- Dependencies: 1019
+-- Name: COLUMN g_los.istgeom_y; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.g_los.istgeom_y IS 'Long aus GNSS Messung im FIM';
+
+
+--
+-- TOC entry 7580 (class 0 OID 0)
+-- Dependencies: 1019
+-- Name: COLUMN g_los.istgeom_x; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.g_los.istgeom_x IS 'Lat aus GNSS Messung im FIM';
+
 
 --
 -- TOC entry 1018 (class 1259 OID 34545)
@@ -305,13 +532,70 @@ ALTER TABLE vwm_impex.g_los ALTER COLUMN id_g_los ADD GENERATED ALWAYS AS IDENTI
 
 
 --
+-- TOC entry 1208 (class 1259 OID 44143)
+-- Name: imp_b_strg; Type: TABLE; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+CREATE TABLE vwm_impex.imp_b_strg (
+    bestbesid integer,
+    s_strgid integer,
+    los_id integer,
+    glos_id integer
+);
+
+
+ALTER TABLE vwm_impex.imp_b_strg OWNER TO waldinv_admin;
+
+--
+-- TOC entry 7582 (class 0 OID 0)
+-- Dependencies: 1208
+-- Name: COLUMN imp_b_strg.bestbesid; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_b_strg.bestbesid IS 'ID der Bestandesbeschreibung t_bestbes';
+
+
+--
+-- TOC entry 7583 (class 0 OID 0)
+-- Dependencies: 1208
+-- Name: COLUMN imp_b_strg.s_strgid; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_b_strg.s_strgid IS 'ID aus s_strg';
+
+
+--
+-- TOC entry 7584 (class 0 OID 0)
+-- Dependencies: 1208
+-- Name: COLUMN imp_b_strg.los_id; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_b_strg.los_id IS 'los_id referenziert den Punkt und die Erhebung eindeutig';
+
+
+--
+-- TOC entry 1209 (class 1259 OID 44147)
+-- Name: imp_b_strgsonstig; Type: TABLE; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+CREATE TABLE vwm_impex.imp_b_strgsonstig (
+    idpunktinfo integer,
+    stoerung text,
+    los_id integer,
+    glos_id integer
+);
+
+
+ALTER TABLE vwm_impex.imp_b_strgsonstig OWNER TO waldinv_admin;
+
+--
 -- TOC entry 1021 (class 1259 OID 34562)
 -- Name: imp_t_baumplot; Type: TABLE; Schema: vwm_impex; Owner: waldinv_admin
 --
 
 CREATE TABLE vwm_impex.imp_t_baumplot (
     id_t_bpl integer NOT NULL,
-    los_id character varying,
+    los_id integer,
     bplotnr integer,
     onr integer,
     baid smallint,
@@ -320,14 +604,15 @@ CREATE TABLE vwm_impex.imp_t_baumplot (
     bhd integer,
     h_bhd integer DEFAULT 13,
     schal boolean,
-    fege boolean
+    fege boolean,
+    glos_id integer
 );
 
 
 ALTER TABLE vwm_impex.imp_t_baumplot OWNER TO waldinv_admin;
 
 --
--- TOC entry 7555 (class 0 OID 0)
+-- TOC entry 7587 (class 0 OID 0)
 -- Dependencies: 1021
 -- Name: TABLE imp_t_baumplot; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -351,7 +636,7 @@ ALTER TABLE vwm_impex.imp_t_baumplot ALTER COLUMN id_t_bpl ADD GENERATED ALWAYS 
 
 
 --
--- TOC entry 1206 (class 1259 OID 44099)
+-- TOC entry 1205 (class 1259 OID 44099)
 -- Name: imp_t_besbodenveggr; Type: TABLE; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -361,15 +646,16 @@ CREATE TABLE vwm_impex.imp_t_besbodenveggr (
     verteilung_id smallint,
     prozanteil smallint,
     bestbesid bigint,
-    los_id integer
+    los_id integer,
+    glos_id integer
 );
 
 
 ALTER TABLE vwm_impex.imp_t_besbodenveggr OWNER TO waldinv_admin;
 
 --
--- TOC entry 7557 (class 0 OID 0)
--- Dependencies: 1206
+-- TOC entry 7589 (class 0 OID 0)
+-- Dependencies: 1205
 -- Name: TABLE imp_t_besbodenveggr; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -377,7 +663,52 @@ COMMENT ON TABLE vwm_impex.imp_t_besbodenveggr IS 'Daten zur Bodenvegetationsgru
 
 
 --
--- TOC entry 1205 (class 1259 OID 44098)
+-- TOC entry 7590 (class 0 OID 0)
+-- Dependencies: 1205
+-- Name: COLUMN imp_t_besbodenveggr.bodenveggr_id; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_besbodenveggr.bodenveggr_id IS 'bodenvegetationsgruppe aus s_bodenveggr';
+
+
+--
+-- TOC entry 7591 (class 0 OID 0)
+-- Dependencies: 1205
+-- Name: COLUMN imp_t_besbodenveggr.verteilung_id; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_besbodenveggr.verteilung_id IS 'Verteilung aus s_vert';
+
+
+--
+-- TOC entry 7592 (class 0 OID 0)
+-- Dependencies: 1205
+-- Name: COLUMN imp_t_besbodenveggr.prozanteil; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_besbodenveggr.prozanteil IS 'Anteil der Gruppe die Erfasst wurde';
+
+
+--
+-- TOC entry 7593 (class 0 OID 0)
+-- Dependencies: 1205
+-- Name: COLUMN imp_t_besbodenveggr.bestbesid; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_besbodenveggr.bestbesid IS 'ID der Bestandesbeschreibung - kann zukünftig entfallen';
+
+
+--
+-- TOC entry 7594 (class 0 OID 0)
+-- Dependencies: 1205
+-- Name: COLUMN imp_t_besbodenveggr.los_id; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_besbodenveggr.los_id IS 'los_id referenziert eindeutig auf Punkt und Aufnahme in t_los';
+
+
+--
+-- TOC entry 1204 (class 1259 OID 44098)
 -- Name: imp_t_besbodenveggr_id_besbodenveggr_seq; Type: SEQUENCE; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -406,14 +737,15 @@ CREATE TABLE vwm_impex.imp_t_bestbes (
     bed_us smallint,
     bed_bodenveg smallint,
     nschicht_id integer,
-    heterogenigrad integer DEFAULT 5
+    heterogenigrad integer DEFAULT 5,
+    glos_id integer
 );
 
 
 ALTER TABLE vwm_impex.imp_t_bestbes OWNER TO waldinv_admin;
 
 --
--- TOC entry 7559 (class 0 OID 0)
+-- TOC entry 7596 (class 0 OID 0)
 -- Dependencies: 1032
 -- Name: TABLE imp_t_bestbes; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -451,14 +783,15 @@ CREATE TABLE vwm_impex.imp_t_bestbess (
     nas_id smallint,
     ba_anteil smallint,
     entsart_id smallint,
-    vert_id smallint
+    vert_id smallint,
+    glos_id integer
 );
 
 
 ALTER TABLE vwm_impex.imp_t_bestbess OWNER TO waldinv_admin;
 
 --
--- TOC entry 7561 (class 0 OID 0)
+-- TOC entry 7598 (class 0 OID 0)
 -- Dependencies: 1034
 -- Name: TABLE imp_t_bestbess; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -488,20 +821,21 @@ ALTER TABLE vwm_impex.imp_t_bestbess ALTER COLUMN id_bestbess ADD GENERATED ALWA
 
 CREATE TABLE vwm_impex.imp_t_landmarke (
     id_imp_landmarke integer NOT NULL,
-    los_id character varying,
+    los_id integer,
     punktinfoid bigint NOT NULL,
     lplotnr integer,
     onr integer NOT NULL,
     typ character varying,
     azi integer,
-    dist integer
+    dist integer,
+    glos_id integer
 );
 
 
 ALTER TABLE vwm_impex.imp_t_landmarke OWNER TO waldinv_admin;
 
 --
--- TOC entry 7563 (class 0 OID 0)
+-- TOC entry 7600 (class 0 OID 0)
 -- Dependencies: 1026
 -- Name: TABLE imp_t_landmarke; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -561,7 +895,7 @@ CREATE TABLE vwm_impex.imp_t_punktinfo (
 ALTER TABLE vwm_impex.imp_t_punktinfo OWNER TO waldinv_admin;
 
 --
--- TOC entry 7565 (class 0 OID 0)
+-- TOC entry 7602 (class 0 OID 0)
 -- Dependencies: 1023
 -- Name: TABLE imp_t_punktinfo; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -585,7 +919,7 @@ CREATE SEQUENCE vwm_impex.imp_t_punktinfo_idpunktinfo_seq
 ALTER TABLE vwm_impex.imp_t_punktinfo_idpunktinfo_seq OWNER TO waldinv_admin;
 
 --
--- TOC entry 7567 (class 0 OID 0)
+-- TOC entry 7604 (class 0 OID 0)
 -- Dependencies: 1022
 -- Name: imp_t_punktinfo_idpunktinfo_seq; Type: SEQUENCE OWNED BY; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -600,7 +934,7 @@ ALTER SEQUENCE vwm_impex.imp_t_punktinfo_idpunktinfo_seq OWNED BY vwm_impex.imp_
 
 CREATE TABLE vwm_impex.imp_t_transekt (
     id_transekt bigint NOT NULL,
-    los_id character varying,
+    los_id integer,
     transekti_id bigint,
     ba_icode smallint,
     hst smallint,
@@ -610,14 +944,15 @@ CREATE TABLE vwm_impex.imp_t_transekt (
     trck boolean DEFAULT false,
     frost boolean DEFAULT false,
     insekt boolean DEFAULT false,
-    schael_fege boolean DEFAULT false
+    schael_fege boolean DEFAULT false,
+    glos_id integer
 );
 
 
 ALTER TABLE vwm_impex.imp_t_transekt OWNER TO waldinv_admin;
 
 --
--- TOC entry 7568 (class 0 OID 0)
+-- TOC entry 7605 (class 0 OID 0)
 -- Dependencies: 1030
 -- Name: TABLE imp_t_transekt; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -647,7 +982,7 @@ ALTER TABLE vwm_impex.imp_t_transekt ALTER COLUMN id_transekt ADD GENERATED ALWA
 
 CREATE TABLE vwm_impex.imp_t_transektinfo (
     id_transektinfo integer NOT NULL,
-    los_id character varying,
+    los_id integer,
     punktinfoid bigint,
     laenge integer,
     tempstoerung boolean DEFAULT false,
@@ -657,19 +992,129 @@ CREATE TABLE vwm_impex.imp_t_transektinfo (
     homogen boolean DEFAULT false,
     sma_id integer DEFAULT 0,
     krautanteil integer,
-    azi integer
+    azi integer,
+    transektstoerungursache character varying,
+    glos_id integer
 );
 
 
 ALTER TABLE vwm_impex.imp_t_transektinfo OWNER TO waldinv_admin;
 
 --
--- TOC entry 7570 (class 0 OID 0)
+-- TOC entry 7607 (class 0 OID 0)
 -- Dependencies: 1028
 -- Name: TABLE imp_t_transektinfo; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
 COMMENT ON TABLE vwm_impex.imp_t_transektinfo IS 'Informationen zum Transekt - t_transekt. Es besteht die Möglichkeit an einem SP mehrere Transekte anzulegen.';
+
+
+--
+-- TOC entry 7608 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.los_id; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.los_id IS 'eindeutige Referenzierung von Punkt und Aufnahme über t_los';
+
+
+--
+-- TOC entry 7609 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.punktinfoid; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.punktinfoid IS 'Referenzierung auf punktinfo - kann zukünftig entfallen wenn Felder nach t_los überführt';
+
+
+--
+-- TOC entry 7610 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.laenge; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.laenge IS 'Transektlänge in dm - Standard 200';
+
+
+--
+-- TOC entry 7611 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.tempstoerung; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.tempstoerung IS 'Temporärer Störung die aktuell eine Aufnahme verhindert';
+
+
+--
+-- TOC entry 7612 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.hase; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.hase IS 'Verbiss von Hase im Transekt';
+
+
+--
+-- TOC entry 7613 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.maus; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.maus IS 'Verbiss von Maus im Transekt';
+
+
+--
+-- TOC entry 7614 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.biber; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.biber IS 'Verbiss von Biber im Transekt';
+
+
+--
+-- TOC entry 7615 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.homogen; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.homogen IS 'kann zukünftig entfallen - war mal zur Arbeitserleichterung gedacht';
+
+
+--
+-- TOC entry 7616 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.sma_id; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.sma_id IS 'Schutzmaßnahmen-id aus s_sma';
+
+
+--
+-- TOC entry 7617 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.krautanteil; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.krautanteil IS 'Anteil der Kräuter und Sträucher im Transekt';
+
+
+--
+-- TOC entry 7618 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.azi; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.azi IS 'Azimut des Transektes vom SP aus';
+
+
+--
+-- TOC entry 7619 (class 0 OID 0)
+-- Dependencies: 1028
+-- Name: COLUMN imp_t_transektinfo.transektstoerungursache; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektinfo.transektstoerungursache IS 'Ursache für tempstoerung';
 
 
 --
@@ -698,19 +1143,55 @@ CREATE TABLE vwm_impex.imp_t_transektipf (
     transekti_id bigint,
     indikpfl_id integer,
     anteilsprozent integer,
-    transektinfoid bigint NOT NULL
+    glos_id integer
 );
 
 
 ALTER TABLE vwm_impex.imp_t_transektipf OWNER TO waldinv_admin;
 
 --
--- TOC entry 7572 (class 0 OID 0)
+-- TOC entry 7621 (class 0 OID 0)
 -- Dependencies: 1036
 -- Name: TABLE imp_t_transektipf; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
 COMMENT ON TABLE vwm_impex.imp_t_transektipf IS 'Indikatorpflanzen im Transekt';
+
+
+--
+-- TOC entry 7622 (class 0 OID 0)
+-- Dependencies: 1036
+-- Name: COLUMN imp_t_transektipf.los_id; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektipf.los_id IS 'eindeutige Referenzierung des Punktes und der Aufnahme aus t_los';
+
+
+--
+-- TOC entry 7623 (class 0 OID 0)
+-- Dependencies: 1036
+-- Name: COLUMN imp_t_transektipf.transekti_id; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektipf.transekti_id IS 'transektinfo_id ursprüngliche Referenzierung - kann zukünftig entfallen';
+
+
+--
+-- TOC entry 7624 (class 0 OID 0)
+-- Dependencies: 1036
+-- Name: COLUMN imp_t_transektipf.indikpfl_id; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektipf.indikpfl_id IS 'Indikatorpflanzen_id aus vwm.s_indikpfl';
+
+
+--
+-- TOC entry 7625 (class 0 OID 0)
+-- Dependencies: 1036
+-- Name: COLUMN imp_t_transektipf.anteilsprozent; Type: COMMENT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+COMMENT ON COLUMN vwm_impex.imp_t_transektipf.anteilsprozent IS 'Anteil der Indikatorpflanze an der Aufnahmefläche im Transekt';
 
 
 --
@@ -729,7 +1210,7 @@ ALTER TABLE vwm_impex.imp_t_transektipf ALTER COLUMN id_tripfl ADD GENERATED ALW
 
 
 --
--- TOC entry 7108 (class 2606 OID 34552)
+-- TOC entry 7117 (class 2606 OID 34552)
 -- Name: g_los g_los_pkey; Type: CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -738,7 +1219,7 @@ ALTER TABLE ONLY vwm_impex.g_los
 
 
 --
--- TOC entry 7110 (class 2606 OID 34569)
+-- TOC entry 7119 (class 2606 OID 34569)
 -- Name: imp_t_baumplot imp_t_baumplot_pkey; Type: CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -747,7 +1228,7 @@ ALTER TABLE ONLY vwm_impex.imp_t_baumplot
 
 
 --
--- TOC entry 7124 (class 2606 OID 44103)
+-- TOC entry 7133 (class 2606 OID 44103)
 -- Name: imp_t_besbodenveggr imp_t_besbodenveggr_pkey; Type: CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -756,7 +1237,7 @@ ALTER TABLE ONLY vwm_impex.imp_t_besbodenveggr
 
 
 --
--- TOC entry 7118 (class 2606 OID 34628)
+-- TOC entry 7127 (class 2606 OID 34628)
 -- Name: imp_t_bestbes imp_t_bestbes_pkey; Type: CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -765,7 +1246,7 @@ ALTER TABLE ONLY vwm_impex.imp_t_bestbes
 
 
 --
--- TOC entry 7120 (class 2606 OID 34656)
+-- TOC entry 7129 (class 2606 OID 34656)
 -- Name: imp_t_bestbess imp_t_bestbess_pkey; Type: CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -774,7 +1255,7 @@ ALTER TABLE ONLY vwm_impex.imp_t_bestbess
 
 
 --
--- TOC entry 7112 (class 2606 OID 34596)
+-- TOC entry 7121 (class 2606 OID 34596)
 -- Name: imp_t_landmarke imp_t_landmarke_pkey; Type: CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -783,7 +1264,7 @@ ALTER TABLE ONLY vwm_impex.imp_t_landmarke
 
 
 --
--- TOC entry 7116 (class 2606 OID 34621)
+-- TOC entry 7125 (class 2606 OID 34621)
 -- Name: imp_t_transekt imp_t_transekt_pkey; Type: CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -792,7 +1273,7 @@ ALTER TABLE ONLY vwm_impex.imp_t_transekt
 
 
 --
--- TOC entry 7114 (class 2606 OID 34610)
+-- TOC entry 7123 (class 2606 OID 34610)
 -- Name: imp_t_transektinfo imp_t_transektinfo_pkey; Type: CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -801,7 +1282,7 @@ ALTER TABLE ONLY vwm_impex.imp_t_transektinfo
 
 
 --
--- TOC entry 7122 (class 2606 OID 34662)
+-- TOC entry 7131 (class 2606 OID 34662)
 -- Name: imp_t_transektipf imp_t_transektipf_pkey; Type: CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -810,15 +1291,141 @@ ALTER TABLE ONLY vwm_impex.imp_t_transektipf
 
 
 --
--- TOC entry 7106 (class 1259 OID 34553)
+-- TOC entry 7115 (class 1259 OID 34553)
 -- Name: g_los_ist_geom_idx; Type: INDEX; Schema: vwm_impex; Owner: waldinv_admin
 --
 
-CREATE INDEX g_los_ist_geom_idx ON vwm_impex.g_los USING gist (ist_geom);
+CREATE INDEX g_los_ist_geom_idx ON vwm_impex.g_los USING gist (aktuell_geom);
 
 
 --
--- TOC entry 7553 (class 0 OID 0)
+-- TOC entry 7134 (class 2606 OID 44228)
+-- Name: imp_t_baumplot fk_g_los; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_baumplot
+    ADD CONSTRAINT fk_g_los FOREIGN KEY (glos_id) REFERENCES vwm_impex.g_los(id_g_los) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 7135 (class 2606 OID 44233)
+-- Name: imp_t_landmarke fk_g_los; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_landmarke
+    ADD CONSTRAINT fk_g_los FOREIGN KEY (glos_id) REFERENCES vwm_impex.g_los(id_g_los) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 7144 (class 2606 OID 44238)
+-- Name: imp_t_besbodenveggr fk_g_los; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_besbodenveggr
+    ADD CONSTRAINT fk_g_los FOREIGN KEY (glos_id) REFERENCES vwm_impex.g_los(id_g_los) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 7139 (class 2606 OID 44243)
+-- Name: imp_t_bestbes fk_g_los; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_bestbes
+    ADD CONSTRAINT fk_g_los FOREIGN KEY (glos_id) REFERENCES vwm_impex.g_los(id_g_los) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 7140 (class 2606 OID 44248)
+-- Name: imp_t_bestbess fk_g_los; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_bestbess
+    ADD CONSTRAINT fk_g_los FOREIGN KEY (glos_id) REFERENCES vwm_impex.g_los(id_g_los) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 7137 (class 2606 OID 44253)
+-- Name: imp_t_transekt fk_g_los; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_transekt
+    ADD CONSTRAINT fk_g_los FOREIGN KEY (glos_id) REFERENCES vwm_impex.g_los(id_g_los) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 7136 (class 2606 OID 44258)
+-- Name: imp_t_transektinfo fk_g_los; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_transektinfo
+    ADD CONSTRAINT fk_g_los FOREIGN KEY (glos_id) REFERENCES vwm_impex.g_los(id_g_los) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 7142 (class 2606 OID 44263)
+-- Name: imp_t_transektipf fk_g_los; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_transektipf
+    ADD CONSTRAINT fk_g_los FOREIGN KEY (glos_id) REFERENCES vwm_impex.g_los(id_g_los) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 7146 (class 2606 OID 44268)
+-- Name: imp_b_strg fk_g_los; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_b_strg
+    ADD CONSTRAINT fk_g_los FOREIGN KEY (glos_id) REFERENCES vwm_impex.g_los(id_g_los) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 7147 (class 2606 OID 44273)
+-- Name: imp_b_strgsonstig fk_g_los; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_b_strgsonstig
+    ADD CONSTRAINT fk_g_los FOREIGN KEY (glos_id) REFERENCES vwm_impex.g_los(id_g_los) ON DELETE CASCADE;
+
+
+--
+-- TOC entry 7145 (class 2606 OID 44288)
+-- Name: imp_t_besbodenveggr imp_t_besbodenveggr_imp_t_bestbes_fk; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_besbodenveggr
+    ADD CONSTRAINT imp_t_besbodenveggr_imp_t_bestbes_fk FOREIGN KEY (bestbesid) REFERENCES vwm_impex.imp_t_bestbes(id_bestbes);
+
+
+--
+-- TOC entry 7141 (class 2606 OID 44283)
+-- Name: imp_t_bestbess imp_t_bestbess_imp_t_bestbes_fk; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_bestbess
+    ADD CONSTRAINT imp_t_bestbess_imp_t_bestbes_fk FOREIGN KEY (bestbesid) REFERENCES vwm_impex.imp_t_bestbes(id_bestbes);
+
+
+--
+-- TOC entry 7138 (class 2606 OID 44278)
+-- Name: imp_t_transekt imp_t_transekt_imp_t_transektinfo_fk; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_transekt
+    ADD CONSTRAINT imp_t_transekt_imp_t_transektinfo_fk FOREIGN KEY (transekti_id) REFERENCES vwm_impex.imp_t_transektinfo(id_transektinfo);
+
+
+--
+-- TOC entry 7143 (class 2606 OID 44293)
+-- Name: imp_t_transektipf imp_t_transektipf_imp_t_transektinfo_fk; Type: FK CONSTRAINT; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+ALTER TABLE ONLY vwm_impex.imp_t_transektipf
+    ADD CONSTRAINT imp_t_transektipf_imp_t_transektinfo_fk FOREIGN KEY (transekti_id) REFERENCES vwm_impex.imp_t_transektinfo(id_transektinfo);
+
+
+--
+-- TOC entry 7575 (class 0 OID 0)
 -- Dependencies: 19
 -- Name: SCHEMA vwm_impex; Type: ACL; Schema: -; Owner: waldinv_admin
 --
@@ -831,7 +1438,16 @@ GRANT ALL ON SCHEMA vwm_impex TO twiebke;
 
 
 --
--- TOC entry 7554 (class 0 OID 0)
+-- TOC entry 7576 (class 0 OID 0)
+-- Dependencies: 4565
+-- Name: LANGUAGE plpgsql; Type: ACL; Schema: -; Owner: simplex4data_main
+--
+
+GRANT ALL ON LANGUAGE plpgsql TO waldinv_admin;
+
+
+--
+-- TOC entry 7581 (class 0 OID 0)
 -- Dependencies: 1019
 -- Name: TABLE g_los; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -842,7 +1458,27 @@ GRANT SELECT ON TABLE vwm_impex.g_los TO simplex4data_lfb;
 
 
 --
--- TOC entry 7556 (class 0 OID 0)
+-- TOC entry 7585 (class 0 OID 0)
+-- Dependencies: 1208
+-- Name: TABLE imp_b_strg; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+GRANT SELECT,INSERT,DELETE,TRUNCATE,UPDATE ON TABLE vwm_impex.imp_b_strg TO vwm_ats;
+GRANT SELECT ON TABLE vwm_impex.imp_b_strg TO lfb_read;
+
+
+--
+-- TOC entry 7586 (class 0 OID 0)
+-- Dependencies: 1209
+-- Name: TABLE imp_b_strgsonstig; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
+--
+
+GRANT SELECT,INSERT,DELETE,TRUNCATE,UPDATE ON TABLE vwm_impex.imp_b_strgsonstig TO vwm_ats;
+GRANT SELECT ON TABLE vwm_impex.imp_b_strgsonstig TO lfb_read;
+
+
+--
+-- TOC entry 7588 (class 0 OID 0)
 -- Dependencies: 1021
 -- Name: TABLE imp_t_baumplot; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -853,8 +1489,8 @@ GRANT SELECT ON TABLE vwm_impex.imp_t_baumplot TO simplex4data_lfb;
 
 
 --
--- TOC entry 7558 (class 0 OID 0)
--- Dependencies: 1206
+-- TOC entry 7595 (class 0 OID 0)
+-- Dependencies: 1205
 -- Name: TABLE imp_t_besbodenveggr; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
 --
 
@@ -863,7 +1499,7 @@ GRANT SELECT ON TABLE vwm_impex.imp_t_besbodenveggr TO lfb_read;
 
 
 --
--- TOC entry 7560 (class 0 OID 0)
+-- TOC entry 7597 (class 0 OID 0)
 -- Dependencies: 1032
 -- Name: TABLE imp_t_bestbes; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -874,7 +1510,7 @@ GRANT SELECT ON TABLE vwm_impex.imp_t_bestbes TO simplex4data_lfb;
 
 
 --
--- TOC entry 7562 (class 0 OID 0)
+-- TOC entry 7599 (class 0 OID 0)
 -- Dependencies: 1034
 -- Name: TABLE imp_t_bestbess; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -885,7 +1521,7 @@ GRANT SELECT ON TABLE vwm_impex.imp_t_bestbess TO simplex4data_lfb;
 
 
 --
--- TOC entry 7564 (class 0 OID 0)
+-- TOC entry 7601 (class 0 OID 0)
 -- Dependencies: 1026
 -- Name: TABLE imp_t_landmarke; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -896,7 +1532,7 @@ GRANT SELECT ON TABLE vwm_impex.imp_t_landmarke TO simplex4data_lfb;
 
 
 --
--- TOC entry 7566 (class 0 OID 0)
+-- TOC entry 7603 (class 0 OID 0)
 -- Dependencies: 1023
 -- Name: TABLE imp_t_punktinfo; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -907,7 +1543,7 @@ GRANT SELECT ON TABLE vwm_impex.imp_t_punktinfo TO simplex4data_lfb;
 
 
 --
--- TOC entry 7569 (class 0 OID 0)
+-- TOC entry 7606 (class 0 OID 0)
 -- Dependencies: 1030
 -- Name: TABLE imp_t_transekt; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -918,7 +1554,7 @@ GRANT SELECT ON TABLE vwm_impex.imp_t_transekt TO simplex4data_lfb;
 
 
 --
--- TOC entry 7571 (class 0 OID 0)
+-- TOC entry 7620 (class 0 OID 0)
 -- Dependencies: 1028
 -- Name: TABLE imp_t_transektinfo; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -929,7 +1565,7 @@ GRANT SELECT ON TABLE vwm_impex.imp_t_transektinfo TO simplex4data_lfb;
 
 
 --
--- TOC entry 7573 (class 0 OID 0)
+-- TOC entry 7626 (class 0 OID 0)
 -- Dependencies: 1036
 -- Name: TABLE imp_t_transektipf; Type: ACL; Schema: vwm_impex; Owner: waldinv_admin
 --
@@ -939,7 +1575,7 @@ GRANT SELECT ON TABLE vwm_impex.imp_t_transektipf TO lfb_read;
 GRANT SELECT ON TABLE vwm_impex.imp_t_transektipf TO simplex4data_lfb;
 
 
--- Completed on 2024-07-16 15:57:09 UTC
+-- Completed on 2024-07-22 17:22:09 UTC
 
 --
 -- PostgreSQL database dump complete
